@@ -44,6 +44,7 @@ app.on('quit', () => {
   log.info('(main/index) <<<<<<<<<<<<<<<<<<<');
 });
 
+
 // Register to global, so renderer can access these with remote.getGlobal
 global.services = {
   application,

@@ -1058,6 +1058,11 @@
     global-agent "^2.0.2"
     global-tunnel-ng "^2.7.1"
 
+"@electron/remote@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/@electron/remote/-/remote-2.0.0.tgz#32047cc088760b1c62710a69a79e23c56ababc15"
+  integrity sha512-SQLoM/8GT0ItAqSlwBvgk5om6wtfIcJnj9xc8L3Jk0wYMkUYin+ijGCGMIflWv37Gw+q4VcmxURo9NxlAyXMbw==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"

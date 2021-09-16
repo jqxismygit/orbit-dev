@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.0.0-beta.49",
+    "babel-plugin-import": "^1.13.3",
     "concurrently": "^3.5.1",
     "electron": "^14.0.1",
     "electron-builder": "^20.15.1",
@@ -38,6 +39,7 @@
     "umi": "^3.5.17"
   },
   "dependencies": {
+    "@electron/remote": "^2.0.0",
     "antd": "^4.16.13"
   }
 }

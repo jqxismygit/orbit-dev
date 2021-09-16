@@ -1,4 +1,4 @@
-import { create, getPath } from "./window";
+import { create, getPath } from './window';
 
 export function init() {
   const win = create({
@@ -6,7 +6,9 @@ export function init() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      sandbox: false,
+      enableRemoteModule: true,
     },
   });
   win.loadURL(getPath());

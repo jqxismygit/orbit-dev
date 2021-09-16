@@ -1,13 +1,14 @@
 import React from 'react';
+import path from 'path';
 
-export const useSelectDir = () => {
-  const [path, setPath] = React.useState();
+export const useSelectDir = (defaultPath) => {
+  const [workPath, setWorkPath] = React.useState(defaultPath);
   function updatePath() {
     const input = document.getElementById('_ef');
     const files = input.files;
     try {
-      if (files.length === 1 && typeof files[0].path === 'string') {
-        setPath(files[0].path);
+      if (files.length >= 1 && typeof files[0].path === 'string') {
+        setWorkPath(path.dirname(files[0].path));
       } else {
         alert('设置出错');
       }
@@ -33,5 +34,9 @@ export const useSelectDir = () => {
     input.click();
   }, []);
 
-  return { path, handleSelect };
+  const ignore = React.useCallback(() => {
+    alert('由于响应效率问题暂不支持');
+  }, []);
+
+  return { workPath, setWorkPath, handleSelect: ignore };
 };

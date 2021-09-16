@@ -5,85 +5,72 @@ import { join } from 'path';
 import fs from 'fs';
 import { shell, dialog } from 'electron';
 import { Button, Radio } from 'antd';
+import { Context } from '../components/context';
 const childProcess = require('child_process');
 
+import Setting from '../components/setting';
+import Install from '../components/install';
+import Start from '../components/start';
+import Publish from '../components/publish';
+import { get, set } from '../utils/config';
+import { parseModules } from '../utils';
 import styles from './index.less';
 
-export default (props) => {
+const PAGES = [
+  {
+    key: 'install',
+    name: '安装',
+    component: Install,
+  },
+  {
+    key: 'start',
+    name: '运行',
+    component: Start,
+  },
+  {
+    key: 'publish',
+    name: '发布',
+    component: Publish,
+  },
+  {
+    key: 'setting',
+    name: '设置',
+    component: Setting,
+  },
+];
+
+const PAGES_MAP = PAGES.reduce((prev, c) => {
+  prev[c.key] = c;
+  return prev;
+}, {});
+
+export default () => {
+  const [workspace, setWorkspace] = React.useState(() => get('workspace'));
+
+  const [page, setPage] = React.useState(() =>
+    workspace ? 'start' : 'setting',
+  );
+  const PageComponent = PAGES_MAP[page] && PAGES_MAP[page].component;
+
+  const updateWorkspace = React.useCallback((path) => {
+    setWorkspace(path);
+    set('workspace', path);
+  }, []);
+
+  const moduleParsed = React.useMemo(
+    () => (workspace ? parseModules(workspace) : undefined),
+    [workspace],
+  );
+
   // React.useEffect(() => {
-  //   const cwd = process.cwd();
-  //   log.info("cwd = ", join(cwd), __dirname);
-  //   const files = fs.readdirSync(join("./"));
-  //   files.forEach(function (module) {
-  //     log.info("module = ", module);
-  //   });
+  //   const ws = get('workspace');
+  //   log.info('ws = ', ws);
+  //   if (!ws) {
+  //     setPage('setting');
+  //   } else {
+  //     setPage('start');
+  //   }
   // }, []);
-
-  const handleClick = () => {
-    function updatePath() {
-      var inputObj = document.getElementById('_ef');
-
-      var files = inputObj.files;
-
-      // log.info(files);
-
-      try {
-        if (files.length > 1) {
-          alert('当前仅支持选择一个文件');
-        } else {
-          log.info('path = ', files[0].path);
-          switch (this.btntype) {
-            case 'store': // 临时变量的值赋给输出路径
-              this.outpath = files[0].path;
-
-              break;
-
-            case 'add': // 添加文件操作
-              this.filepath = files[0].path;
-
-              // if (this.addFile(this.filepath)) {
-              //   alert('添加成功');
-              // }
-
-              break;
-
-            default:
-              break;
-          }
-        } // 移除事件监听器
-
-        inputObj.removeEventListener('change', function () {}); // 从DOM中移除input
-
-        document.body.removeChild(inputObj);
-      } catch (error) {
-        alert(error);
-      }
-    }
-
-    var inputObj = document.createElement('input'); // 设置属性
-
-    inputObj.setAttribute('id', '_ef');
-
-    inputObj.setAttribute('type', 'file');
-
-    inputObj.setAttribute('style', 'visibility:hidden');
-
-    if (true) {
-      // 如果要选择路径，则添加以下两个属性
-
-      inputObj.setAttribute('webkitdirectory', '');
-
-      inputObj.setAttribute('directory', '');
-    } // 添加到DOM中
-
-    document.body.appendChild(inputObj); // 添加事件监听器
-
-    inputObj.addEventListener('change', updatePath); // 模拟点击
-
-    inputObj.click();
-  };
-
-  log.info('path = ', window.localStorage.getItem('path'));
 
   return (
     // <div style={{ textAlign: 'center' }}>
@@ -127,16 +114,37 @@ export default (props) => {
     //   <br />
     //   <br />
     // </div>
-    <div>
-      <div className={styles.header}>
-        <Radio.Group defaultValue="install" buttonStyle="solid" size={'small'}>
-          <Radio.Button value="install">安装</Radio.Button>
-          <Radio.Button value="start">运行</Radio.Button>
-          <Radio.Button value="publish">发布</Radio.Button>
-          <Radio.Button value="setting">设置</Radio.Button>
-        </Radio.Group>
+    <Context.Provider
+      value={{
+        workspace,
+        setWorkspace: updateWorkspace,
+        modules: moduleParsed,
+      }}
+    >
+      <div>
+        <div className={styles.header}>
+          <span className={styles.title}>Orbit小助手v0.0.1</span>
+        </div>
+        <div className={styles.tabs}>
+          <Radio.Group
+            value={page}
+            buttonStyle="solid"
+            size={'small'}
+            onChange={(e) => setPage(e.target.value)}
+          >
+            {PAGES.map((i) => (
+              <Radio.Button
+                key={i.key}
+                value={i.key}
+                disabled={!workspace && i.key !== 'setting'}
+              >
+                {i.name}
+              </Radio.Button>
+            ))}
+          </Radio.Group>
+        </div>
+        <div className={styles.body}>{PageComponent && <PageComponent />}</div>
       </div>
-      <div className={styles.body}></div>
-    </div>
+    </Context.Provider>
   );
 };
