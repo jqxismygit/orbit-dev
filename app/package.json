@@ -1,11 +1,11 @@
 {
-  "name": "umi-example-electron",
+  "name": "orbit-dev",
   "version": "1.0.0",
-  "description": "Yet another boilerplate for umi+dva+electron.",
+  "description": "开发小助手.",
   "main": "dist/main/main.js",
   "author": {
-    "name": "chencheng",
-    "email": "sorrycc@gmail.com"
+    "name": "king",
+    "email": "117745900@qq.com"
   },
   "dependencies": {
     "electron-config": "^1.0.0",

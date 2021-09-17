@@ -45,6 +45,7 @@ const PAGES_MAP = PAGES.reduce((prev, c) => {
 }, {});
 
 export default () => {
+  console.log('index22---------------->>');
   const [workspace, setWorkspace] = React.useState(() => get('workspace'));
 
   const [page, setPage] = React.useState(() =>
@@ -61,6 +62,9 @@ export default () => {
     () => (workspace ? parseModules(workspace) : undefined),
     [workspace],
   );
+
+  console.log('workspace = ', workspace);
+  console.log('page = ', page);
 
   // React.useEffect(() => {
   //   const ws = get('workspace');
@@ -114,6 +118,7 @@ export default () => {
     //   <br />
     //   <br />
     // </div>
+
     <Context.Provider
       value={{
         workspace,

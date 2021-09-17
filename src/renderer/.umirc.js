@@ -7,6 +7,8 @@ export default {
   // hashHistory: true,
   // publicPath: './static',
   outputPath: '../../app/dist/renderer',
+  history: { type: 'hash' },
+  publicPath: './',
   externals(context, request, callback) {
     // console.log('request = ', request);
     const isDev = process.env.NODE_ENV === 'development';

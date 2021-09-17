@@ -44,6 +44,8 @@ app.on('quit', () => {
   log.info('(main/index) <<<<<<<<<<<<<<<<<<<');
 });
 
+const STORE_PATH = app.getAppPath('appData');
+log.info('STORE_PATH = ', STORE_PATH);
 
 // Register to global, so renderer can access these with remote.getGlobal
 global.services = {

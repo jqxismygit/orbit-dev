@@ -1,5 +1,5 @@
 import { create, getPath } from './window';
-
+import log from 'electron-log';
 export function init() {
   const win = create({
     width: 800,
@@ -11,5 +11,6 @@ export function init() {
       enableRemoteModule: true,
     },
   });
+  log.info('path = ', getPath());
   win.loadURL(getPath());
 }

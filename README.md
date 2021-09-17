@@ -1,4 +1,4 @@
-# umi-example-electron
+# orbit-dev
 
 Electron example with [umi](https://github.com/umijs/umi/) and [dva](https://github.com/dvajs/dva/).
 

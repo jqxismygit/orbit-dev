@@ -3,7 +3,7 @@ import log from 'electron-log';
 import fs from 'fs';
 // const { app } = require('@electron/remote')
 console.log = log.info;
-
+log.info('render umi--------->>>');
 //配置路径
 
 // const STORE_PATH = app.getAppPath('appData');
