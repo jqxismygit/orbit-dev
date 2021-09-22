@@ -28,6 +28,15 @@ export default {
     callback(null, isExternal);
   },
   // antd: {},
+  routes: [
+    {
+      path: '/',
+      component: '@/pages/index',
+      wrappers: [
+        '@/wrappers',
+      ],
+    },
+  ],
   extraBabelPlugins: [
     [
       'import',

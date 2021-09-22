@@ -4,7 +4,7 @@ import log from 'electron-log';
 import { join } from 'path';
 import fs from 'fs';
 import { shell, dialog } from 'electron';
-import { Button, Radio } from 'antd';
+import { Modal, Radio } from 'antd';
 import { Context } from '../components/context';
 const childProcess = require('child_process');
 
@@ -14,6 +14,7 @@ import Start from '../components/start';
 import Publish from '../components/publish';
 import { get, set } from '../utils/config';
 import { parseModules } from '../utils';
+import { createShell } from '../cmd';
 import styles from './index.less';
 
 const PAGES = [
@@ -49,7 +50,7 @@ export default () => {
   const [workspace, setWorkspace] = React.useState(() => get('workspace'));
 
   const [page, setPage] = React.useState(() =>
-    workspace ? 'start' : 'setting',
+    workspace ? 'install' : 'setting',
   );
   const PageComponent = PAGES_MAP[page] && PAGES_MAP[page].component;
 
@@ -66,59 +67,37 @@ export default () => {
   console.log('workspace = ', workspace);
   console.log('page = ', page);
 
-  // React.useEffect(() => {
-  //   const ws = get('workspace');
-  //   log.info('ws = ', ws);
-  //   if (!ws) {
-  //     setPage('setting');
-  //   } else {
-  //     setPage('start');
-  //   }
-  // }, []);
+  React.useEffect(() => {
+    const filePath = join(window.__config__.APP_DATA_PATH, 'pipeline-js.js');
+
+    if (fs.existsSync(filePath)) {
+      Modal.confirm({
+        title: `检测到上次依赖版本号有修改没有同步，是否继续?`,
+        // icon: <IconFont type="icon-attention" style={{ color: '#E57022' }} />,
+        cancelText: '取消',
+        okText: '确认',
+        onOk() {
+          const cmd = `
+          #!/bin/sh
+          node ${filePath}
+          rm -rf ${filePath}
+          `;
+          const shell = createShell(cmd);
+          childProcess.execSync(`open -a Terminal ${shell}`);
+        },
+        onCancel() {
+          const cmd = `
+          #!/bin/sh
+          rm -rf ${filePath}
+          `;
+          const shell = createShell(cmd);
+          childProcess.execSync(`open -a Terminal ${shell}`);
+        },
+      });
+    }
+  }, []);
 
   return (
-    // <div style={{ textAlign: 'center' }}>
-    //   <Button
-    //     type={'primary'}
-    //     onClick={() => {
-    //       // shell.openExternal('https://www.baidu.com/');
-    //       // childProcess.spawnSync(`ls -a`, { stdio: [0, 1, 2] });
-    //       log.info(process.env.HOME);
-    //       // childProcess.execSync(`open -a Terminal ./ --args ./test.sh aaa`);
-    //       // const ls = childProcess.spawn(`open ${process.env.SHELL}`, [], {
-    //       //   cwd: '/',
-    //       // });
-
-    //       // ls.stdout.on('data', (data) => {
-    //       //   console.log(`stdout: ${data}`);
-    //       // });
-
-    //       // ls.stderr.on('data', (data) => {
-    //       //   console.error(`stderr: ${data}`);
-    //       // });
-
-    //       // ls.on('close', (code) => {
-    //       //   console.log(`child process exited with code ${code}`);
-    //       // });
-    //       dialog.showOpenDialog();
-    //     }}
-    //   >
-    //     test
-    //   </Button>
-    //   <Button onClick={handleClick}>update</Button>
-    //   <Button
-    //     onClick={() => {
-    //       window.localStorage.setItem('path', '123123');
-    //     }}
-    //   >
-    //     save
-    //   </Button>
-    //   {/* <h2>Data Test: {props.g}</h2> */}
-    //   {/* <h2>is.osx(): {JSON.stringify(is.osx())}</h2> */}
-    //   <br />
-    //   <br />
-    // </div>
-
     <Context.Provider
       value={{
         workspace,

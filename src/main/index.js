@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, ipcMain } from 'electron';
 import { join } from 'path';
 import is from 'electron-is';
 import log from 'electron-log';
@@ -44,14 +44,10 @@ app.on('quit', () => {
   log.info('(main/index) <<<<<<<<<<<<<<<<<<<');
 });
 
-const STORE_PATH = app.getAppPath('appData');
-log.info('STORE_PATH = ', STORE_PATH);
+//为了不引入remote，这里采用ipc通讯方式来共享主进程信息
 
-// Register to global, so renderer can access these with remote.getGlobal
-global.services = {
-  application,
-  window,
-};
-global.configs = {
-  config,
-};
+const APP_DATA_PATH = app.getAppPath('appData');
+
+ipcMain.on('set-config', (event, arg) => {
+  event.reply('set-config-reply', { APP_DATA_PATH });
+});

@@ -5,6 +5,7 @@ const cwd = process.cwd();
 export default function (webpackConfig, { webpack }) {
   webpackConfig.entry = {
     main: './src/main/index.js',
+    preload: './src/main/preload.js'
   };
   webpackConfig.output.path = join(cwd, './app/dist/main');
   webpackConfig.target = 'electron';

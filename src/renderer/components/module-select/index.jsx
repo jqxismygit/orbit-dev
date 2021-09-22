@@ -4,6 +4,27 @@ import styles from './index.less';
 const ModuleSelect = (props) => {
   const { modules, value = {}, onChange } = props;
 
+  /*
+    "la"uncher
+    "li"b
+    "m"odule
+  */
+  const [la, li, m] = React.useMemo(() => {
+    return (modules || []).reduce(
+      (prev, c) => {
+        if (c.type === 'launcher') {
+          prev[0].push(c);
+        } else if (c.type === 'lib') {
+          prev[1].push(c);
+        } else if (c.type === 'module') {
+          prev[2].push(c);
+        }
+        return prev;
+      },
+      [[], [], []],
+    );
+  }, [modules]);
+
   const renderModules = (ms) => {
     return (
       ms &&
@@ -40,7 +61,7 @@ const ModuleSelect = (props) => {
           });
         }}
       >
-        <Row>{renderLauncherModules(modules.launcher)}</Row>
+        <Row>{renderLauncherModules(la)}</Row>
       </Radio.Group>
       <div className={styles.header} style={{ marginTop: 12 }}>
         组件库(lib)
@@ -55,7 +76,7 @@ const ModuleSelect = (props) => {
           });
         }}
       >
-        <Row>{renderModules(modules.lib)}</Row>
+        <Row>{renderModules(li)}</Row>
       </Checkbox.Group>
       <div className={styles.header} style={{ marginTop: 12 }}>
         模块(module)
@@ -70,7 +91,7 @@ const ModuleSelect = (props) => {
           });
         }}
       >
-        <Row>{renderModules(modules.module)}</Row>
+        <Row>{renderModules(m)}</Row>
       </Checkbox.Group>
     </>
   );

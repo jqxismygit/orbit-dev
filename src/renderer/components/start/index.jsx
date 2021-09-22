@@ -2,16 +2,20 @@ import React from 'react';
 import { Button, Checkbox } from 'antd';
 import { useContext } from '../context';
 import ModuleSelect from '../module-select';
-const childProcess = require('child_process');
+import { start } from '../../cmd';
 import styles from './index.less';
 
 const Start = (props) => {
-  const { modules } = useContext();
+  const { modules, workspace } = useContext();
   const [selected, onSelected] = React.useState({
     launcher: 'orbit-launcher',
     lib: [],
     module: [],
   });
+
+  const allModules = React.useMemo(() => {
+    return [...selected.lib, ...selected.module];
+  }, [selected]);
 
   const [standlone, setStandlone] = React.useState(true);
 
@@ -33,8 +37,10 @@ const Start = (props) => {
         <Button
           type={'primary'}
           style={{ marginLeft: 8 }}
+          disabled={!selected.module || selected.module.length === 0}
           onClick={() => {
-            childProcess.execSync(`open -a Terminal ./ `);
+            // childProcess.execSync(`open -a Terminal ./ `);
+            start(workspace, selected.launcher, allModules, standlone);
           }}
         >
           启动
