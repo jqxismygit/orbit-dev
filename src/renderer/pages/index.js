@@ -3,8 +3,7 @@ import is from 'electron-is';
 import log from 'electron-log';
 import { join } from 'path';
 import fs from 'fs';
-import { shell, dialog } from 'electron';
-import { Modal, Radio } from 'antd';
+import { Button, Modal, Radio } from 'antd';
 import { Context } from '../components/context';
 const childProcess = require('child_process');
 
@@ -46,9 +45,8 @@ const PAGES_MAP = PAGES.reduce((prev, c) => {
 }, {});
 
 export default () => {
-  console.log('index22---------------->>');
   const [workspace, setWorkspace] = React.useState(() => get('workspace'));
-
+  const [index, forceUpdate] = React.useReducer((x) => x + 1, 0);
   const [page, setPage] = React.useState(() =>
     workspace ? 'install' : 'setting',
   );
@@ -61,11 +59,8 @@ export default () => {
 
   const moduleParsed = React.useMemo(
     () => (workspace ? parseModules(workspace) : undefined),
-    [workspace],
+    [workspace, index],
   );
-
-  console.log('workspace = ', workspace);
-  console.log('page = ', page);
 
   React.useEffect(() => {
     const filePath = join(window.__config__.APP_DATA_PATH, 'pipeline-js.js');
@@ -108,6 +103,9 @@ export default () => {
       <div>
         <div className={styles.header}>
           <span className={styles.title}>Orbit小助手v0.0.1</span>
+          <Button type={'primary'} size={'small'} onClick={forceUpdate}>
+            刷新
+          </Button>
         </div>
         <div className={styles.tabs}>
           <Radio.Group
