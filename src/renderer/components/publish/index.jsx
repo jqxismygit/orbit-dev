@@ -1,8 +1,19 @@
 import React from 'react';
-import { Table, Button } from 'antd';
+import { Table, Button, Modal, Tag } from 'antd';
 import { useContext } from '../context';
+import { getAllDepModulesEx, DYNIMIC_LIBS } from '../../utils';
+import Steps from './steps';
+import styles from './index.less';
+
 const Publish = (props) => {
   const { modules } = useContext();
+
+  const [publishModules, setPublishModules] = React.useState([]);
+  const [modalData, setModalData] = React.useState({
+    visible: false,
+    single: true,
+    data: {},
+  });
 
   const mainBranch = React.useMemo(() => {
     const branchMap = modules.reduce((prev, c) => {
@@ -26,7 +37,23 @@ const Publish = (props) => {
     }, undefined);
   }, [modules]);
 
-  console.log('mainBranch = ', mainBranch);
+  const realPublishModules = React.useMemo(() => {
+    if (modalData.visible) {
+      let depModules = [];
+      if (modalData.single && typeof modalData.data === 'string') {
+        if (DYNIMIC_LIBS.indexOf(modalData.data) > -1) {
+          depModules = ['orbit-launcher', modalData.data];
+        } else {
+          depModules = [modalData.data];
+        }
+      } else {
+        depModules = getAllDepModulesEx(modalData.data, modules);
+      }
+      return depModules;
+    } else {
+      return undefined;
+    }
+  }, [modalData.visible, modalData.single, modalData.data, modules]);
 
   const columns = [
     {
@@ -60,24 +87,78 @@ const Publish = (props) => {
       dataIndex: 'operation',
       render: (_, record) => (
         <>
-          <Button size={'small'} disabled>
-            发布
-          </Button>
+          {record.type === 'lib' && (
+            <Button
+              size={'small'}
+              disabled={record.name === 'orbit-application-library'}
+              onClick={() => {
+                setModalData({
+                  visible: true,
+                  single: true,
+                  data: record.name,
+                });
+              }}
+            >
+              独立发布
+            </Button>
+          )}
           {/* <a>发布</a> */}
         </>
       ),
     },
   ];
 
+  const rowSelection = {
+    onChange: (selectedRowKeys, selectedRows) => {
+      // console.log(`selectedRowKeys: ${selectedRowKeys}`);
+      setPublishModules(selectedRowKeys);
+    },
+    getCheckboxProps: (record) => ({
+      disabled: record.content && record.content.private === true,
+    }),
+  };
+
   return (
-    modules && (
-      <Table
-        dataSource={modules}
-        columns={columns}
-        size={'small'}
-        pagination={false}
-      />
-    )
+    <>
+      <div className={styles.header}>
+        <Button
+          size={'small'}
+          type={'primary'}
+          disabled={!publishModules || publishModules.length === 0}
+          onClick={() => {
+            setModalData({
+              visible: true,
+              single: false,
+              data: publishModules,
+            });
+          }}
+        >
+          一键发布
+        </Button>
+      </div>
+      {modules && (
+        <Table
+          dataSource={modules}
+          rowKey={'name'}
+          columns={columns}
+          size={'small'}
+          pagination={false}
+          rowSelection={{
+            type: 'checkbox',
+            ...rowSelection,
+          }}
+        />
+      )}
+      <Modal
+        title="模块发布"
+        visible={modalData.visible}
+        destroyOnClose
+        // onOk={handleOk}
+        onCancel={() => setModalData({ visible: false })}
+      >
+        <Steps modalData={modalData} realPublishModules={realPublishModules} />
+      </Modal>
+    </>
   );
 };
 

@@ -48,7 +48,7 @@ export default () => {
   const [workspace, setWorkspace] = React.useState(() => get('workspace'));
   const [index, forceUpdate] = React.useReducer((x) => x + 1, 0);
   const [page, setPage] = React.useState(() =>
-    workspace ? 'install' : 'setting',
+    workspace ? 'publish' : 'setting',
   );
   const PageComponent = PAGES_MAP[page] && PAGES_MAP[page].component;
 

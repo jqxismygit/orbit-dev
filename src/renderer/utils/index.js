@@ -13,7 +13,7 @@ export function readJsonFile(path) {
   return json;
 }
 
-function getBranch(gitPath) {
+export function getBranch(gitPath) {
   const branchs = childProcess
     .execSync(`git branch`, { cwd: gitPath })
     .toString();
@@ -24,12 +24,14 @@ function getBranch(gitPath) {
   return branch.slice(2);
 }
 
-const libModules = [
-  'orbit-core',
-  'orbit-library',
-  'orbit-layout',
-  'orbit-application-library',
-];
+export function getBranchFromModuleName(workspace, moduleName) {
+  const modulePath = join(workspace, 'packages', moduleName);
+  return getBranch(modulePath);
+}
+
+export const DYNIMIC_LIBS = ['orbit-core', 'orbit-library', 'orbit-layout'];
+
+const libModules = DYNIMIC_LIBS.concat(['orbit-application-library']);
 
 /*
 状态对象
@@ -88,7 +90,7 @@ export const parseModules = (workspacePath) => {
       return prev;
     }, []);
 
-    return parsed;
+    return parsed.sort((a, b) => (libModules.indexOf(a.name) > -1 ? -1 : 1));
     // log.info('groupBy = ', groupBy);
 
     //module分类
@@ -111,12 +113,13 @@ export function packageName2ModuleName(packageName) {
   return mName;
 }
 
+//这个是找出bootstrap的所有依赖
 export function getAllDepModules(modules, moduleMap) {
   // console.log('moduleMap = ', moduleMap);
   function findDepModule(modules) {
     return modules.reduce((prev, c) => {
       const packageContent = moduleMap[c] && moduleMap[c].content;
-      // console.log('packageContent = ', packageContent);
+      console.log('packageContent = ', packageContent);
       if (packageContent && packageContent.dependencies) {
         //第一次先把已知的模块push
         prev.push(c);
@@ -135,37 +138,56 @@ export function getAllDepModules(modules, moduleMap) {
     }, []);
   }
   const firstFindModules = findDepModule(modules);
+  // console.log('firstFindModules = ', firstFindModules);
   return Array.from(new Set(findDepModule(firstFindModules)));
   //这里需要检查两次，第一次检查直接传入的模块，第二次是检查出的依赖模块还需要检查一次
 }
 
-/*
-export function getAllDepModules(modules, workspace) {
-  let depModules = [];
-  modules.map((m) => {
-    const packagePath = join(workspace, `packages`, m, 'package.json');
-    if (fs.existsSync(packagePath)) {
-      const packageConfig = fs.readFileSync(packagePath);
-      depModules.push(m);
-      Object.keys(packageConfig.dependencies).forEach((k) => {
-        if (typeof k === 'string' && k.startsWith('@sensoro')) {
-          //这里千万注意
-          const mName = packageName2ModuleName(k, workspace);
-          if (mName) {
-            depModules.push(mName);
-          }
-        }
-      }, {});
-    }
-  });
-  depModules = Array.from(new Set(depModules));
-  return depModules;
+//这里写一个简单的deepClone
+
+export function deepClone(obj) {
+  if (typeof obj === 'object') {
+    return Object.keys(obj).reduce((prev, c) => {
+      if (obj[c] instanceof Array) {
+        prev[c] = obj[c].map((i) => deepClone(i));
+      } else if (typeof obj[c] === 'object') {
+        prev[c] = deepClone(obj[c]);
+      } else {
+        prev[c] = obj[c];
+      }
+      return prev;
+    }, {});
+  } else {
+    return obj;
+  }
 }
 
-//需要两次才能完全计算出依赖的包
-export function getAllDepModulesEx(modules, workspace) {
-  const firstModules = getAllDepModules(modules, workspace);
-  return getAllDepModules(firstModules, workspace);
-}
+//这个是找出所有publish所需要的依赖，这个需要多次
 
-*/
+export function getAllDepModulesEx(modules = [], allModules = []) {
+  function findModules(modules, allModules) {
+    const moduleSet = modules.reduce((prev, c) => {
+      if (c) {
+        prev.add(c);
+        // console.log('allModules = ', allModules);
+        allModules &&
+          allModules.forEach((i) => {
+            if (i.name !== c) {
+              const packageContent = i.content;
+              if (
+                packageContent.dependencies &&
+                Object.keys(packageContent.dependencies).some(
+                  (k) => packageName2ModuleName(k) === c,
+                )
+              ) {
+                prev.add(i.name);
+              }
+            }
+          });
+      }
+      return prev;
+    }, new Set([]));
+    return Array.from(moduleSet);
+  }
+  return findModules(findModules(modules), allModules);
+}

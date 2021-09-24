@@ -2,7 +2,7 @@ import { join } from 'path';
 import fs from 'fs';
 import {
   getAllDepModules,
-  readJsonFile,
+  deepClone,
   packageName2ModuleName,
 } from '../utils';
 const childProcess = require('child_process');
@@ -35,24 +35,7 @@ export const start = (workspace, launcher, modules = [], standlone = true) => {
   childProcess.execSync(`open -a Terminal ${shell}`);
 };
 
-//这里写一个简单的deepClone
 
-function deepClone(obj) {
-  if (typeof obj === 'object') {
-    return Object.keys(obj).reduce((prev, c) => {
-      if (obj[c] instanceof Array) {
-        prev[c] = obj[c].map((i) => deepClone(i));
-      } else if (typeof obj[c] === 'object') {
-        prev[c] = deepClone(obj[c]);
-      } else {
-        prev[c] = obj[c];
-      }
-      return prev;
-    }, {});
-  } else {
-    return obj;
-  }
-}
 
 export const bootstrap = (
   workspace,
@@ -80,17 +63,6 @@ export const bootstrap = (
         if (typeof k === 'string' && k.startsWith('@sensoro')) {
           //这里千万注意
           const n = packageName2ModuleName(k);
-          // if (n && moduleMap[n]) {
-          //   console.log(
-          //     'packageContent.dependencies[k] = ',
-          //     packageContent.dependencies[k],
-          //   );
-          //   console.log(
-          //     'moduleMap[n].version = ',
-          //     moduleMap[n].content.version,
-          //   );
-          // }
-
           if (
             n &&
             moduleMap[n] &&
