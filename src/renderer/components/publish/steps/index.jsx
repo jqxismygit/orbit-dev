@@ -1,7 +1,8 @@
 import React from 'react';
 import CalcDep from './calc_dep';
 import CheckBranch from './check_branch';
-
+import RemoteCheck from './remote_check';
+import Publish from './publish';
 const Steps = (props) => {
   const { children, ...rest } = props;
   const [index, setIndex] = React.useState(0);
@@ -12,6 +13,7 @@ const Steps = (props) => {
           ? React.cloneElement(child, {
               ...rest,
               next: () => setIndex(idx + 1),
+              prev: () => idx > 0 && setIndex(idx - 1),
             })
           : null;
       })}
@@ -22,8 +24,10 @@ const Steps = (props) => {
 export default (props) => {
   return (
     <Steps>
-      {/* <CalcDep {...props} /> */}
+      <CalcDep {...props} />
       <CheckBranch {...props} />
+      <RemoteCheck {...props} />
+      <Publish {...props} />
     </Steps>
   );
 };

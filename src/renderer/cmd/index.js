@@ -1,10 +1,6 @@
 import { join } from 'path';
 import fs from 'fs';
-import {
-  getAllDepModules,
-  deepClone,
-  packageName2ModuleName,
-} from '../utils';
+import { getAllDepModules, deepClone, packageName2ModuleName } from '../utils';
 const childProcess = require('child_process');
 
 export function createShell(cmd) {
@@ -35,7 +31,32 @@ export const start = (workspace, launcher, modules = [], standlone = true) => {
   childProcess.execSync(`open -a Terminal ${shell}`);
 };
 
+export const publishModules = (workspace, modules = []) => {
+  const cmd = `
+  #!/bin/sh
+  cd ${workspace}
+  yarn publish:packages ${modules.join(' ')}
+  `;
+  const shell = createShell(cmd);
+  childProcess.execSync(`open -a Terminal ${shell}`);
+};
 
+export const pullAndPushModules = (workspace, branch, modules = []) => {
+  const cmd = `
+#!/bin/sh
+${modules.map(
+  (m) =>
+    `cd ${join(
+      workspace,
+      'packages',
+      m,
+    )}\n git pull origin ${branch}\n git add . \n git commit -am "chore: auto merge"\n git push origin ${branch}\n`,
+)}
+`;
+  // console.log('cmd = ', cmd);
+  const shell = createShell(cmd.replaceAll(',', ''));
+  childProcess.execSync(`open -a Terminal ${shell}`);
+};
 
 export const bootstrap = (
   workspace,

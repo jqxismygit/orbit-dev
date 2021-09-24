@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { join } from 'path';
+import { getBranch } from './git';
 
 const childProcess = require('child_process');
 
@@ -13,21 +14,21 @@ export function readJsonFile(path) {
   return json;
 }
 
-export function getBranch(gitPath) {
-  const branchs = childProcess
-    .execSync(`git branch`, { cwd: gitPath })
-    .toString();
-  const split = branchs.split('\n');
-  const branch = split.find(function (b) {
-    return b && b.startsWith('*');
-  });
-  return branch.slice(2);
-}
+// export function getBranch(gitPath) {
+//   const branchs = childProcess
+//     .execSync(`git branch`, { cwd: gitPath })
+//     .toString();
+//   const split = branchs.split('\n');
+//   const branch = split.find(function (b) {
+//     return b && b.startsWith('*');
+//   });
+//   return branch.slice(2);
+// }
 
-export function getBranchFromModuleName(workspace, moduleName) {
-  const modulePath = join(workspace, 'packages', moduleName);
-  return getBranch(modulePath);
-}
+// export function getBranchFromModuleName(workspace, moduleName) {
+//   const modulePath = join(workspace, 'packages', moduleName);
+//   return getBranch(modulePath);
+// }
 
 export const DYNIMIC_LIBS = ['orbit-core', 'orbit-library', 'orbit-layout'];
 
@@ -58,7 +59,7 @@ export const parseModules = (workspacePath) => {
     }, []);
 
     const parsed = modules.reduce((prev, c) => {
-      const branch = getBranch(join(modulePath, c));
+      const branch = getBranch(c, workspacePath);
       const packagePath = join(modulePath, c, 'package.json');
       const content = readJsonFile(packagePath);
       if (libModules.indexOf(c) > -1) {

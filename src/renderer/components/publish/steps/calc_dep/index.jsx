@@ -8,8 +8,6 @@ export default (props) => {
 
   const [state, setState] = React.useState('loading');
 
-  console.log('realPublishModules = ', realPublishModules);
-
   React.useState(() => {
     setTimeout(() => {
       setState('success');
@@ -36,7 +34,7 @@ export default (props) => {
             }
           >
             <InfoCircleOutlined
-              style={{ marginLeft: 4, color: 'rgba(0, 0, 0, 0.6)' }}
+              style={{ marginLeft: 4 }}
             />
           </Popover>
         )}

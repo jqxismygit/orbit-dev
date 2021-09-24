@@ -27,7 +27,7 @@ export const StateComponent = (props) => {
       {state === 'warning' && (
         <WarningTwoTone
           className={className}
-          twoToneColor="#00ff00"
+          twoToneColor="#dfec25"
           style={{
             fontSize: 12,
             marginRight: 4,
