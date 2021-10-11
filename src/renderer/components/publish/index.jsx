@@ -153,7 +153,7 @@ const Publish = (props) => {
         title="模块发布"
         visible={modalData.visible}
         destroyOnClose
-        // onOk={handleOk}
+        onOk={() => setModalData({ visible: false })}
         onCancel={() => setModalData({ visible: false })}
       >
         <Steps modalData={modalData} realPublishModules={realPublishModules} />

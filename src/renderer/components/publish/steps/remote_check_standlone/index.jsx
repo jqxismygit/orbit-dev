@@ -2,54 +2,34 @@ import React from 'react';
 import styles from './index.less';
 import Step, { StateComponent } from '../step';
 import { getBranch, hasChange } from '../../../../utils/git';
-import { syncModules } from '../../../../cmd';
+import { syncModulesEx } from '../../../../cmd';
 import { useContext } from '../../../context';
 import { Button, Popover } from 'antd';
 
 function diff(workspace, modules) {
   const branchMap = modules.reduce((prev, c) => {
     const branch = getBranch(c, workspace);
-    if (prev[branch]) {
-      prev[branch].push(c);
-    } else {
-      prev[branch] = [c];
-    }
+    prev[c] = branch;
     return prev;
   }, {});
-  const mainBranch = Object.keys(branchMap).reduce((prev, c) => {
-    if (prev) {
-      if (branchMap[prev].length < branchMap[c].length) {
-        prev = c;
+
+  return modules.reduce(
+    (prev, c) => {
+      const changed = hasChange(
+        c,
+        workspace,
+        branchMap[c],
+        `origin/${branchMap[c]}`,
+      );
+      if (changed) {
+        prev.changed.push({ name: c, branch: branchMap[c] });
+      } else {
+        prev.unchanged.push({ name: c, branch: branchMap[c] });
       }
-    } else {
-      prev = c;
-    }
-    return prev;
-  }, undefined);
-
-  const unitive = Object.keys(branchMap).length === 1;
-
-  if (!unitive) {
-    return { changed: [], unchanged: [], mainBranch };
-  } else {
-    return modules.reduce(
-      (prev, c) => {
-        const changed = hasChange(
-          c,
-          workspace,
-          mainBranch,
-          `origin/${mainBranch}`,
-        );
-        if (changed) {
-          prev.changed.push(c);
-        } else {
-          prev.unchanged.push(c);
-        }
-        return prev;
-      },
-      { changed: [], unchanged: [], mainBranch },
-    );
-  }
+      return prev;
+    },
+    { changed: [], unchanged: [], branchMap },
+  );
 }
 
 export default (props) => {
@@ -58,7 +38,10 @@ export default (props) => {
   const { workspace } = useContext();
   // const [pulling, setPulling] = React.useState(false);
   const updateRef = React.useRef(false);
-  const { changed, unchanged, mainBranch } = React.useMemo(
+
+  const mainPublishModule = modalData.data;
+
+  const { changed, unchanged, branchMap } = React.useMemo(
     () => diff(workspace, realPublishModules),
     [workspace, realPublishModules],
   );
@@ -102,7 +85,8 @@ export default (props) => {
             <Popover
               content={
                 <div style={{ maxHeight: 400, overflowY: 'scroll' }}>
-                  {changed && changed.map((i) => <div key={i}>{i}</div>)}
+                  {changed &&
+                    changed.map((i) => <div key={i.name}>{i.name}</div>)}
                 </div>
               }
             >
@@ -115,7 +99,7 @@ export default (props) => {
             size={'small'}
             style={{ marginLeft: 4 }}
             onClick={() => {
-              syncModules(workspace, mainBranch, changed);
+              syncModulesEx(workspace, changed);
               setStep(3);
             }}
           >
@@ -155,7 +139,7 @@ export default (props) => {
     } else {
       return <></>;
     }
-  }, [step, workspace, mainBranch, changed]);
+  }, [step, workspace, changed]);
 
   return (
     <Step>

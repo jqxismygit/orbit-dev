@@ -41,6 +41,16 @@ export const publishModules = (workspace, modules = []) => {
   childProcess.execSync(`open -a Terminal ${shell}`);
 };
 
+export const publishDynamicModules = (workspace, modules = []) => {
+  const cmd = `
+  #!/bin/sh
+  cd ${workspace}
+  yarn publish:dynamic ${modules.join(' ')}
+  `;
+  const shell = createShell(cmd);
+  childProcess.execSync(`open -a Terminal ${shell}`);
+};
+
 export const pullAndPushModules = (workspace, branch, modules = []) => {
   const cmd = `
 #!/bin/sh
@@ -51,6 +61,39 @@ ${modules.map(
       'packages',
       m,
     )}\n git pull origin ${branch}\n git add . \n git commit -am "chore: auto merge"\n git push origin ${branch}\n`,
+)}
+`;
+  // console.log('cmd = ', cmd);
+  const shell = createShell(cmd.replaceAll(',', ''));
+  childProcess.execSync(`open -a Terminal ${shell}`);
+};
+
+export const syncModules = (workspace, branch, modules = []) => {
+  const cmd = `
+#!/bin/sh
+${modules.map(
+  (m) =>
+    `cd ${join(
+      workspace,
+      'packages',
+      m,
+    )}\n git pull origin ${branch}\n git add . \n git commit -am "chore: auto merge"\n`,
+)}
+`;
+  // console.log('cmd = ', cmd);
+  const shell = createShell(cmd.replaceAll(',', ''));
+  childProcess.execSync(`open -a Terminal ${shell}`);
+};
+
+//mnodules是一个对象数组
+export const syncModulesEx = (workspace, modules = []) => {
+  const cmd = `
+#!/bin/sh
+${modules.map(
+  (m) =>
+    `cd ${join(workspace, 'packages', m.name)}\n git pull origin ${
+      m.branch
+    }\n git add . \n git commit -am "chore: auto merge"\n`,
 )}
 `;
   // console.log('cmd = ', cmd);

@@ -192,3 +192,16 @@ export function getAllDepModulesEx(modules = [], allModules = []) {
   }
   return findModules(findModules(modules), allModules);
 }
+
+export function getUpdateType(branch) {
+  if (branch && (branch.startsWith('master') || branch.startsWith('release'))) {
+    return 0;
+  } else if (
+    branch &&
+    (branch.startsWith('test') || branch.startsWith('readyToTest'))
+  ) {
+    return 1;
+  } else {
+    return 2;
+  }
+}
